@@ -1,32 +1,42 @@
 import React, { useState, useEffect } from 'react';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { useParams } from 'react-router-dom';
+import db from '../firebase/firebaseConfig';
 import ItemList from './ItemList';
 
 const ItemListContainer = ({ greeting }) => {
   const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { categoryId } = useParams();
 
   useEffect(() => {
-    // Simulación de una llamada a una API o promesa
-    const fetchItems = new Promise((resolve) => {
-      setTimeout(() => {
-        const mockItems = [
-          { id: 1, name: 'Item 1', category: 'electronics' },
-          { id: 2, name: 'Item 2', category: 'clothing' },
-          { id: 3, name: 'Item 3', category: 'electronics' },
-        ];
-        resolve(mockItems);
-      }, 1000);
-    });
+    setLoading(true);
+    setError(null);
 
-    fetchItems.then((data) => {
-      if (categoryId) {
-        setItems(data.filter((item) => item.category === categoryId));
-      } else {
-        setItems(data);
+    const getProducts = async () => {
+      try {
+        let q = collection(db, "products");
+        if (categoryId) {
+          q = query(q, where("category", "==", categoryId));
+        }
+
+        const querySnapshot = await getDocs(q);
+        const products = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setItems(products);
+      } catch (err) {
+        console.error("Error fetching products:", err);
+        setError("Error al cargar los productos");
+      } finally {
+        setLoading(false);
       }
-    });
+    };
+
+    getProducts();
   }, [categoryId]);
+
+  if (loading) return <p>Cargando...</p>;
+  if (error) return <p>{error}</p>;
 
   return (
     <div>

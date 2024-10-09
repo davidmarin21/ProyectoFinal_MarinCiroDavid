@@ -1,29 +1,19 @@
+import React, { useContext } from 'react';
+import { CartContext } from '../context/CartContext';
+import { Link } from 'react-router-dom';
 
 const CartWidget = () => {
-  return (
-    <div style={styles.cartWidget}>
-      🛒
-      <span style={styles.cartCount}>0</span>
-    </div>
-  );
-};
+  const { cartTotal } = useContext(CartContext);
 
-const styles = {
-  cartWidget: {
-    position: 'relative',
-    fontSize: '1.5rem',
-    cursor: 'pointer',
-  },
-  cartCount: {
-    position: 'absolute',
-    top: '-10px',
-    right: '-10px',
-    backgroundColor: 'red',
-    borderRadius: '50%',
-    color: '#fff',
-    padding: '0.2rem 0.5rem',
-    fontSize: '0.8rem',
-  }
+  return (
+    <Link to="/cart">
+      <div className="cart-widget">
+        {/* Asegúrate de tener una imagen en public/cart-icon.png o cambia la ruta */}
+        <img src="/cart-icon.png" alt="Carrito de Compras" />
+        <span>{cartTotal() > 0 ? cartTotal() : ''}</span>
+      </div>
+    </Link>
+  );
 };
 
 export default CartWidget;
